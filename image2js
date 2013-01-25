@@ -19,6 +19,7 @@ except :
     print 'Failed to read "'+filepath+'"'
     sys.exit(1)
 allowed_types = [
+    "image/jpg",
     "image/jpeg",
     "image/png", 
     "image/gif"
