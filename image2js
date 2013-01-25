@@ -1,0 +1,59 @@
+#!/usr/bin/python
+
+from magic import magic
+import sys
+import re
+import base64
+
+#Set get the filename from the first argument
+if len(sys.argv) <= 1 :
+    print "Usage: "+sys.argv[0]+" filename"
+    sys.exit(1)
+filepath = sys.argv[1]
+
+#Check the mime type
+mime = magic.Magic(mime=True)
+try :
+    mimetype = mime.from_file(filepath)
+except :
+    print 'Failed to read "'+filepath+'"'
+    sys.exit(1)
+allowed_types = [
+    "image/jpeg",
+    "image/png", 
+    "image/gif"
+]
+if mimetype not in allowed_types :
+    print 'Cannot handle file "'+filepath+'" of type "'+mimetype+'"'
+    sys.exit(1)
+
+#Make an output name to use
+matches = re.search('([^\/\.]+)\.?[^\.\.]*$', filepath)
+try :
+    output_name = matches.group(1) + ".js"
+except :
+    output_name = "out.js"
+
+#Set up the files for reading and writing
+try :
+    in_file = open(filepath, 'r')
+except :
+    print 'Failed to read "'+filepath+'"'
+    sys.exit(1)
+try :
+    out_file = open(output_name, 'w')
+except :
+    print 'Failed to open "'+output_name+'" for writing'
+
+#encode the image
+encoded = base64.b64encode(in_file.read())
+
+#Write it out with the surrounding javascript
+out_file.write('document.write(\'<img src="data:'+mimetype+';charset=utf-8;base64,');
+out_file.write(encoded)
+out_file.write('\" />\');')
+
+in_file.close()
+out_file.close()
+
+
